@@ -37,17 +37,19 @@ private:
 	public:
 		Elem element;
 		LinkNode* next;
-		LinkNode(const Elem& elemVal, LinkNode* nextVal = nullptr) {
+		LinkNode* prev;
+		LinkNode(const Elem& elemVal, LinkNode* prevVal = nullptr, LinkNode* nextVal = nullptr) {
 			element = elemVal;
+			prev = prevVal;
 			next = nextVal;
 		}
-		LinkNode(LinkNode* nextVal = nullptr) { next = nextVal; }
+		LinkNode(LinkNode* preVal = nullptr, LinkNode* nextVal = nullptr) { prev = preVal; next = nextVal; }
 		void* operator new(size_t);	//重载new和delete,手动分配
 		void operator delete(void*);
 	};
 
-		//可利用空间表节点
-		static LinkNode* freeList;
+	//可利用空间表节点
+	static LinkNode* freeList;
 private:
 	LinkNode* head;
 	LinkNode* tail;
@@ -87,7 +89,9 @@ void LinkList<Elem>::LinkNode::operator delete(void* ptr) {
 
 template <typename Elem>
 bool LinkList<Elem>::insert(const Elem& item) {
-	fence->next = new LinkNode(item, fence->next);
+	fence->next = new LinkNode(item, fence, fence->next);
+	if (fence->next->next != nullptr)
+		fence->next->next->prev = fence->next;
 	if (tail == fence) tail = fence->next;
 	rightCnt++;
 	return true;
@@ -95,7 +99,7 @@ bool LinkList<Elem>::insert(const Elem& item) {
 
 template <typename Elem>
 bool LinkList<Elem>::append(const Elem& item) {
-	tail = tail->next = new LinkNode(item, nullptr);
+	tail = tail->next = new LinkNode(item, tail, nullptr);
 	rightCnt++;
 	return true;
 }
@@ -105,7 +109,9 @@ bool LinkList<Elem>::remove(Elem& it) {
 	if (fence->next == nullptr) return false;
 	it = fence->next->element;
 	LinkNode* nodeTemp = fence->next;
-	if (tail == nodeTemp) tail = fence;
+	if (nodeTemp->next != nullptr) nodeTemp->next->prev = fence;
+	else tail = fence;
+	fence->next = nodeTemp->next;
 	delete nodeTemp;
 	rightCnt--;
 	return true;
@@ -113,12 +119,11 @@ bool LinkList<Elem>::remove(Elem& it) {
 
 template <typename Elem>
 void LinkList<Elem>::prev() {
-	LinkNode* temp = head;
-	if (fence == head) return;
-	while (temp->next != fence) temp = temp->next;
-	fence = temp;
-	leftCnt--;
-	rightCnt++;
+	if (fence != head) {
+		fence = fence->prev;
+		leftCnt--;
+		rightCnt++;
+	}
 }
 
 template <typename Elem>
