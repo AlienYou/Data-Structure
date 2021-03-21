@@ -23,12 +23,12 @@ public:
 			codes[i][MAXCODELEN] = '\0';
 		}
 		maxSize = size;
-		currsize = 0;
+		currSize = 0;
 	}
 
 	void addObject(E& obj) {
 		Assert(currSize < maxSize, "CodeTable is full!");
-		obs[currsize++] = obj;
+		obs[currSize++] = obj;
 	}
 	char* getCode(E obj) {
 		for (int i = 0; i < currSize; ++i)
@@ -41,6 +41,14 @@ private:
 	int currSize;
 	int maxSize;
 };
+
+template <typename E>
+ostream& operator<< (ostream& s, HuffNode<E>* z) {
+	if (z->isLeaf())
+		return s << static_cast<LeafNode<E>*>(z)->val();
+	else
+		return s << z->weight();
+}
 
 HuffTree<char>** TreeArray = nullptr;
 
@@ -71,7 +79,7 @@ int read_freqs(CodeTable<char>* ct, FILE* fp) {
 	for (int i = 0; i < count; ++i) {
 		Assert(fgets(buff, 99, fp) != nullptr, "Ran out of codes too early");
 		for (ptr = buff; *ptr == ' '; ptr++);
-		Assert(*ptr == ' ', "First char was not a quote mark.");
+		Assert(*ptr == '"', "First char was not a quote mark.");
 		for (ptr2 = buff2, ptr++; *ptr != '"'; ptr++)
 			*ptr2++ = *ptr;
 		*ptr2 = '\0';
@@ -88,7 +96,7 @@ template <typename E>
 HuffTree<E>* buildHuff(HuffTree<E>** TreeArray, int count) {
 	Heap<HuffTree<E>*, minTreeComp>* forest = new Heap<HuffTree<E>*, minTreeComp>(TreeArray, count, count);
 	
-	HuffTree<char>* temp1, temp2, * temp3 = nullptr;
+	HuffTree<char>* temp1, *temp2, * temp3 = nullptr;
 	while (forest->size() > 1) {
 		temp1 = forest->removeFirst();
 		temp2 = forest->removeFirst();
@@ -100,7 +108,7 @@ HuffTree<E>* buildHuff(HuffTree<E>** TreeArray, int count) {
 	return temp3;
 }
 
-void decode(HuffTree<char>* theTree, char* code, char& msg, int cnt) {
+void decode(HuffTree<char>* theTree, char* code, char& msg, int& cnt) {
 	HuffNode<char>* currNode = theTree->root();
 	while (!currNode->isLeaf()) {
 		cnt++;
@@ -151,7 +159,8 @@ void do_commands(HuffTree<char>* theTree, CodeTable<char>* theTable, FILE* fp) {
 				if (buff[currChar] == ' ') cout << ' ';
 				else cout << theTable->getCode(buff[currChar]);
 			}
-		}
 		cout << "\n";
+		}
 	}
 }
+
