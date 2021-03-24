@@ -3,6 +3,10 @@
 #include "bubsort.h"
 #include "selsort.h"
 #include "shsort.h"
+#include "qsort.h"
+#include "mrgsort.h"
+
+int QUICKTHRESHOLD = 9;
 
 #define ArrayLength(A) (sizeof(A) / sizeof(A[0]))
 
@@ -45,5 +49,17 @@ int main()
     testArray(sp);
     cout << "Shellsort(incr is 3): " << endl;
     sp = shellsort3<int, minintCompare>;
+    testArray(sp);
+    cout << "Qsort: " << endl;
+    sp = quicksort<int, minintCompare>;
+    testArray(sp);
+    cout << "Qsort in threshold: " << endl;
+    sp = quicksortThreshold<int, minintCompare>;
+    testArray(sp);
+    cout << "mergesort: " << endl;
+    sp = mrgsort<int, minintCompare>;
+    testArray(sp);
+    cout << "mergesort2: " << endl;
+    sp = mrgsort2<int, minintCompare>;
     testArray(sp);
 }
