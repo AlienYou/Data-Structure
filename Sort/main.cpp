@@ -5,8 +5,10 @@
 #include "shsort.h"
 #include "qsort.h"
 #include "mrgsort.h"
+#include "heapsort.h"
 
 int QUICKTHRESHOLD = 9;
+int RADIXTHRESHOLD = 5;
 
 #define ArrayLength(A) (sizeof(A) / sizeof(A[0]))
 
@@ -61,5 +63,11 @@ int main()
     testArray(sp);
     cout << "mergesort2: " << endl;
     sp = mrgsort2<int, minintCompare>;
+    testArray(sp);
+    cout << "heapsort: " << endl;
+    sp = heapsort<int, maxintCompare>;
+    testArray(sp);
+    cout << "heapsort with fewer function calls: " << endl;
+    sp = heapsort2<int, minintCompare>;
     testArray(sp);
 }
